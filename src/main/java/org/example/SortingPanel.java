@@ -2,43 +2,41 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 public class SortingPanel extends JPanel {
     private int selectedIndex1 = -1;
     private int selectedIndex2 = -1;
-    private int numComparisons = 0;
-    private int numSwaps = 0;
-    private int numIterations = 0;
-    private long startTime;
-    private long endTime;
-
     private int[] array;
-    private static final int ARRAY_SIZE = 50;
-    private static final int DELAY = 1;
+    private static final int ARRAY_SIZE = 100 + 50;
 
     private SortingVisualizer visualizer;
 
-    // Enum para los tipos de algoritmo de ordenamiento
-    public enum SortAlgorithm {
-        BUBBLE_SORT,
-        SELECTION_SORT
-    }
-
-    // Variable para almacenar el algoritmo seleccionado
-    private SortAlgorithm selectedAlgorithm;
+    // Variable para almacenar la implementación del algoritmo seleccionado
+    private SortAlgorithm sortAlgorithm;
 
     public SortingPanel(SortingVisualizer visualizer) {
         this.visualizer = visualizer;
         array = new int[ARRAY_SIZE];
-        Random rand = new Random();
-
-        for (int i = 0; i < ARRAY_SIZE; i++) {
-            array[i] = rand.nextInt(400) + 50;
+        // Crear una lista de números secuenciales de 1 a ARRAY_SIZE
+        ArrayList<Object> numberList = new ArrayList<>();
+        for (int i = 50; i <= ARRAY_SIZE+50; i++) {
+            numberList.add(i);
         }
 
-        // Por defecto, seleccionamos el algoritmo Bubble Sort
-        selectedAlgorithm = SortAlgorithm.SELECTION_SORT;
+        // Barajar la lista para desorganizarla
+        Collections.shuffle(numberList);
+
+        // Copiar los números barajados al array
+        for (int i = 0; i < ARRAY_SIZE; i++) {
+            array[i] = (int) numberList.get(i);
+        }
+
+
+        // Por defecto, seleccionamos Bubble Sort
+        sortAlgorithm = new InsertionSort();
     }
 
     @Override
@@ -61,125 +59,27 @@ public class SortingPanel extends JPanel {
         }
     }
 
-    // Metodo para cambiar el algoritmo seleccionado
+    // Metodo para cambiar el algoritmo
     public void setAlgorithm(SortAlgorithm algorithm) {
-        this.selectedAlgorithm = algorithm;
+        this.sortAlgorithm = algorithm;
     }
 
     // Metodo para iniciar el algoritmo de ordenamiento seleccionado
     public void startSort() {
         new Thread(() -> {
-            if (selectedAlgorithm == SortAlgorithm.BUBBLE_SORT) {
-                bubbleSort();
-            } else if (selectedAlgorithm == SortAlgorithm.SELECTION_SORT) {
-                selectionSort();
-            }
+            sortAlgorithm.sort(array, visualizer, this);
         }).start();
     }
 
-    private void bubbleSort() {
-        startTime = System.nanoTime();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            numIterations++;
-            for (int j = 0; j < array.length - i - 1; j++) {
-                numIterations++;
-                numComparisons++;
-                visualizer.updateComparisons(numComparisons);
-                visualizer.updateIterations(numIterations);
-
-                selectedIndex1 = j;
-                selectedIndex2 = j + 1;
-                repaint();
-
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (array[j] > array[j + 1]) {
-                    int temp = array[j];
-                    array[j] = array[j + 1];
-                    array[j + 1] = temp;
-
-                    numSwaps++;
-                    visualizer.updateSwaps(numSwaps);
-                    repaint();
-
-                    try {
-                        Thread.sleep(DELAY);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        endTime = System.nanoTime();
-        selectedIndex1 = -1;
-        selectedIndex2 = -1;
-        repaint();
-        visualizer.updateTime((endTime - startTime) / 1_000_000);
-
-        System.out.println("Número total de comparaciones: " + numComparisons);
-        System.out.println("Número total de intercambios: " + numSwaps);
-        System.out.println("Número total de iteraciones: " + numIterations);
-        System.out.println("Tiempo total de ejecución (milisegundos): " + (endTime - startTime) / 1_000_000);
+    // Métodos para gestionar los índices seleccionados
+    public void setSelectedIndices(int index1, int index2) {
+        this.selectedIndex1 = index1;
+        this.selectedIndex2 = index2;
     }
 
-    private void selectionSort() {
-        startTime = System.nanoTime();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            int minIndex = i;
-            numIterations++;
-            for (int j = i + 1; j < array.length; j++) {
-                numComparisons++;
-                visualizer.updateComparisons(numComparisons);
-                visualizer.updateIterations(numIterations);
-
-                selectedIndex1 = i;
-                selectedIndex2 = j;
-                repaint();
-
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (array[j] < array[minIndex]) {
-                    minIndex = j;
-                }
-            }
-
-            if (minIndex != i) {
-                int temp = array[i];
-                array[i] = array[minIndex];
-                array[minIndex] = temp;
-
-                numSwaps++;
-                visualizer.updateSwaps(numSwaps);
-                repaint();
-
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        endTime = System.nanoTime();
-        selectedIndex1 = -1;
-        selectedIndex2 = -1;
-        repaint();
-        visualizer.updateTime((endTime - startTime) / 1_000_000);
-
-        System.out.println("Número total de comparaciones: " + numComparisons);
-        System.out.println("Número total de intercambios: " + numSwaps);
-        System.out.println("Número total de iteraciones: " + numIterations);
-        System.out.println("Tiempo total de ejecución (milisegundos): " + (endTime - startTime) / 1_000_000);
+    public void resetSelectedIndices() {
+        this.selectedIndex1 = -1;
+        this.selectedIndex2 = -1;
     }
 }
+
