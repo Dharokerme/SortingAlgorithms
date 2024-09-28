@@ -13,7 +13,7 @@ Este proyecto consiste en una aplicación de visualización de algoritmos de ord
 ## Características
 
 - Visualización en tiempo real de las comparaciones e intercambios realizados por los algoritmos.
-- Generación de un array de números aleatorios sin repeticiones en el rango del 1 al 500.
+- Generación de un array de números aleatorios sin repeticiones en el rango del 50 al 550.
 - Posibilidad de seleccionar el algoritmo a ejecutar y ver cómo se desorganiza el array inicial.
 
 ## Instalación
