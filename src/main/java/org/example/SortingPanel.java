@@ -5,38 +5,47 @@ import java.awt.*;
 import java.util.Random;
 
 public class SortingPanel extends JPanel {
-    private int selectedIndex1 = -1;  // Índice de la primera barra seleccionada
-    private int selectedIndex2 = -1;  // Índice de la segunda barra seleccionada
-    private int numComparisons = 0;  // Número de comparaciones
-    private int numSwaps = 0;        // Número de intercambios
-    private int numIterations = 0;   // Número de iteraciones del bucle for
-    private long startTime;          // Tiempo de inicio del algoritmo
-    private long endTime;            // Tiempo de fin del algoritmo
+    private int selectedIndex1 = -1;
+    private int selectedIndex2 = -1;
+    private int numComparisons = 0;
+    private int numSwaps = 0;
+    private int numIterations = 0;
+    private long startTime;
+    private long endTime;
 
-    private int[] array;  // Array a ordenar
-    private static final int ARRAY_SIZE = 50;  // Tamaño del array
-    private static final int DELAY = 100;  // Retardo para la animación
+    private int[] array;
+    private static final int ARRAY_SIZE = 50;
+    private static final int DELAY = 1;
 
-    private SortingVisualizer visualizer;  // Referencia a la clase visualizadora
+    private SortingVisualizer visualizer;
+
+    // Enum para los tipos de algoritmo de ordenamiento
+    public enum SortAlgorithm {
+        BUBBLE_SORT,
+        SELECTION_SORT
+    }
+
+    // Variable para almacenar el algoritmo seleccionado
+    private SortAlgorithm selectedAlgorithm;
 
     public SortingPanel(SortingVisualizer visualizer) {
-        this.visualizer = visualizer;  // Guarda la referencia para actualizar las etiquetas
+        this.visualizer = visualizer;
         array = new int[ARRAY_SIZE];
         Random rand = new Random();
 
-        // Inicializa el array con valores aleatorios
         for (int i = 0; i < ARRAY_SIZE; i++) {
-            array[i] = rand.nextInt(400) + 50;  // Números entre 50 y 450
+            array[i] = rand.nextInt(400) + 50;
         }
+
+        // Por defecto, seleccionamos el algoritmo Bubble Sort
+        selectedAlgorithm = SortAlgorithm.SELECTION_SORT;
     }
 
-    // Método para dibujar los elementos en el panel
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLUE);
 
-        // Dibujar cada barra representando un número del array
         for (int i = 0; i < array.length; i++) {
             int x = i * (getWidth() / array.length);
             int y = getHeight() - array[i];
@@ -44,43 +53,45 @@ public class SortingPanel extends JPanel {
             int height = array[i];
 
             if (i == selectedIndex1 || i == selectedIndex2) {
-                g.setColor(Color.RED);  // Color rojo para las barras seleccionadas
+                g.setColor(Color.RED);
             } else {
-                g.setColor(Color.BLUE);  // Color azul para las barras no seleccionadas
+                g.setColor(Color.BLUE);
             }
             g.fillRect(x, y, width, height);
         }
     }
 
-    // Método para iniciar el algoritmo Bubble Sort
-    public void startBubbleSort() {
+    // Metodo para cambiar el algoritmo seleccionado
+    public void setAlgorithm(SortAlgorithm algorithm) {
+        this.selectedAlgorithm = algorithm;
+    }
+
+    // Metodo para iniciar el algoritmo de ordenamiento seleccionado
+    public void startSort() {
         new Thread(() -> {
-            bubbleSort();
+            if (selectedAlgorithm == SortAlgorithm.BUBBLE_SORT) {
+                bubbleSort();
+            } else if (selectedAlgorithm == SortAlgorithm.SELECTION_SORT) {
+                selectionSort();
+            }
         }).start();
     }
 
-    // Algoritmo Bubble Sort con redibujado del panel
     private void bubbleSort() {
-        startTime = System.nanoTime();  // Marca el tiempo de inicio
+        startTime = System.nanoTime();
 
         for (int i = 0; i < array.length - 1; i++) {
-            numIterations++;  // Contador de iteraciones del bucle externo
+            numIterations++;
             for (int j = 0; j < array.length - i - 1; j++) {
-                numIterations++;  // Contador de iteraciones del bucle interno
-                numComparisons++;  // Incrementa el contador de comparaciones
-
-                // Actualizar las estadísticas
+                numIterations++;
+                numComparisons++;
                 visualizer.updateComparisons(numComparisons);
                 visualizer.updateIterations(numIterations);
 
-                // Actualizar los índices comparados
                 selectedIndex1 = j;
                 selectedIndex2 = j + 1;
-
-                // Redibuja el panel
                 repaint();
 
-                // Pausa para la animación
                 try {
                     Thread.sleep(DELAY);
                 } catch (InterruptedException e) {
@@ -88,20 +99,14 @@ public class SortingPanel extends JPanel {
                 }
 
                 if (array[j] > array[j + 1]) {
-                    // Intercambia los elementos
                     int temp = array[j];
                     array[j] = array[j + 1];
                     array[j + 1] = temp;
 
-                    numSwaps++;  // Incrementa el contador de intercambios
-
-                    // Actualizar las estadísticas
+                    numSwaps++;
                     visualizer.updateSwaps(numSwaps);
-
-                    // Redibuja después del intercambio
                     repaint();
 
-                    // Pausa para la animación
                     try {
                         Thread.sleep(DELAY);
                     } catch (InterruptedException e) {
@@ -111,18 +116,70 @@ public class SortingPanel extends JPanel {
             }
         }
 
-        endTime = System.nanoTime();  // Marca el tiempo de finalización
+        endTime = System.nanoTime();
         selectedIndex1 = -1;
         selectedIndex2 = -1;
         repaint();
+        visualizer.updateTime((endTime - startTime) / 1_000_000);
 
-        // Actualizar el tiempo total de ejecución
-        visualizer.updateTime((endTime - startTime)/ 1_000_000);
-
-        // Imprimir los resultados en consola (opcional)
         System.out.println("Número total de comparaciones: " + numComparisons);
         System.out.println("Número total de intercambios: " + numSwaps);
         System.out.println("Número total de iteraciones: " + numIterations);
-        System.out.println("Tiempo total de ejecución (milisegundos): " + (endTime - startTime)/1_000_000);
+        System.out.println("Tiempo total de ejecución (milisegundos): " + (endTime - startTime) / 1_000_000);
+    }
+
+    private void selectionSort() {
+        startTime = System.nanoTime();
+
+        for (int i = 0; i < array.length - 1; i++) {
+            int minIndex = i;
+            numIterations++;
+            for (int j = i + 1; j < array.length; j++) {
+                numComparisons++;
+                visualizer.updateComparisons(numComparisons);
+                visualizer.updateIterations(numIterations);
+
+                selectedIndex1 = i;
+                selectedIndex2 = j;
+                repaint();
+
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (array[j] < array[minIndex]) {
+                    minIndex = j;
+                }
+            }
+
+            if (minIndex != i) {
+                int temp = array[i];
+                array[i] = array[minIndex];
+                array[minIndex] = temp;
+
+                numSwaps++;
+                visualizer.updateSwaps(numSwaps);
+                repaint();
+
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        endTime = System.nanoTime();
+        selectedIndex1 = -1;
+        selectedIndex2 = -1;
+        repaint();
+        visualizer.updateTime((endTime - startTime) / 1_000_000);
+
+        System.out.println("Número total de comparaciones: " + numComparisons);
+        System.out.println("Número total de intercambios: " + numSwaps);
+        System.out.println("Número total de iteraciones: " + numIterations);
+        System.out.println("Tiempo total de ejecución (milisegundos): " + (endTime - startTime) / 1_000_000);
     }
 }

@@ -37,7 +37,7 @@ public class SortingVisualizer extends JFrame {
         add(statsPanel, BorderLayout.SOUTH);
 
         // Comienza la visualización del algoritmo
-        panel.startBubbleSort();
+        panel.startSort();
     }
 
     // Métodos para actualizar las etiquetas
