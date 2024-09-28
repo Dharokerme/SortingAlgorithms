@@ -27,7 +27,7 @@ public class SortingVisualizer extends JFrame {
         comparisonsLabel = new JLabel("Comparaciones: 0");
         swapsLabel = new JLabel("Intercambios: 0");
         iterationsLabel = new JLabel("Iteraciones: 0");
-        timeLabel = new JLabel("Tiempo de ejecución: 0 ms");
+        timeLabel = new JLabel("Tiempo de ejecución: 0 ns");
 
         statsPanel.add(comparisonsLabel);
         statsPanel.add(swapsLabel);
@@ -54,7 +54,7 @@ public class SortingVisualizer extends JFrame {
     }
 
     public void updateTime(long time) {
-        timeLabel.setText("Tiempo de ejecución: " + time  + " ms");
+        timeLabel.setText("Tiempo de ejecución: " + time + " ns");
     }
 
     public static void main(String[] args) {

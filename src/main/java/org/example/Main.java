@@ -8,7 +8,5 @@ public class Main {
             SortingVisualizer frame = new SortingVisualizer();
             frame.setVisible(true);
         });
-
-
     }
 }
